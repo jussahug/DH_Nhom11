@@ -1,4 +1,4 @@
-﻿USE DT;
+USE DT;
 GO
 
 -- Thủ tục transform_phim_data
@@ -23,138 +23,126 @@ BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        -- Transform các giá trị 'unknown' thành -1
+        IF @limitage = 'unknown' SET @limitage = '-1';
+        IF @country = 'unknown' SET @country = '-1';
+        IF @type = 'unknown' SET @type = '-1';
+        IF @brief = 'unknown' SET @brief = '-1';
+        IF @name = 'unknown' SET @name = '-1';
+        IF @director = 'unknown' SET @director = '-1';
+        IF @actor = 'unknown' SET @actor = '-1';
+
         -- Transform các cột limitage_vn
-        IF @limitage != 'unknown'
+        SELECT @limitage_id = gioiHanDoTuoi_id
+        FROM dim_gioiHanDoTuoi
+        WHERE kiHieu = @limitage;
+
+        IF @limitage_id IS NULL
         BEGIN
-            SELECT @limitage_id = gioiHanDoTuoi_id
-            FROM dim_gioiHanDoTuoi
-            WHERE kiHieu = @limitage;
-
-            IF @limitage_id IS NULL
-            BEGIN
-                INSERT INTO dim_gioiHanDoTuoi (kiHieu)
-                VALUES (@limitage);
-                SET @limitage_id = SCOPE_IDENTITY();
-            END;
-
-            UPDATE phimChieuRap_Staging
-            SET limitage_vn = @limitage_id
-            WHERE id = @id;
+            INSERT INTO dim_gioiHanDoTuoi (kiHieu)
+            VALUES (@limitage);
+            SET @limitage_id = SCOPE_IDENTITY();
         END;
+
+        UPDATE phimChieuRap_Staging
+        SET limitage_vn = CAST(@limitage_id AS NVARCHAR(255))
+        WHERE id = @id;
 
         -- Transform các cột country_name_vn
-        IF @country != 'unknown'
+        SELECT @country_id = quocGia_id
+        FROM dim_quocGia
+        WHERE tenQuocGia = @country;
+
+        IF @country_id IS NULL
         BEGIN
-            SELECT @country_id = quocGia_id
-            FROM dim_quocGia
-            WHERE tenQuocGia = @country;
-
-            IF @country_id IS NULL
-            BEGIN
-                INSERT INTO dim_quocGia (tenQuocGia)
-                VALUES (@country);
-                SET @country_id = SCOPE_IDENTITY();
-            END;
-
-            UPDATE phimChieuRap_Staging
-            SET country_name_vn = @country_id
-            WHERE id = @id;
+            INSERT INTO dim_quocGia (tenQuocGia)
+            VALUES (@country);
+            SET @country_id = SCOPE_IDENTITY();
         END;
+
+        UPDATE phimChieuRap_Staging
+        SET country_name_vn = CAST(@country_id AS NVARCHAR(255))
+        WHERE id = @id;
 
         -- Transform các cột type_name_vn
-        IF @type != 'unknown'
+        SELECT @type_id = theLoai_id
+        FROM dim_theLoai
+        WHERE theLoai = @type;
+
+        IF @type_id IS NULL
         BEGIN
-            SELECT @type_id = theLoai_id
-            FROM dim_theLoai
-            WHERE theLoai = @type;
-
-            IF @type_id IS NULL
-            BEGIN
-                INSERT INTO dim_theLoai (theLoai)
-                VALUES (@type);
-                SET @type_id = SCOPE_IDENTITY();
-            END;
-
-            UPDATE phimChieuRap_Staging
-            SET type_name_vn = @type_id
-            WHERE id = @id;
+            INSERT INTO dim_theLoai (theLoai)
+            VALUES (@type);
+            SET @type_id = SCOPE_IDENTITY();
         END;
+
+        UPDATE phimChieuRap_Staging
+        SET type_name_vn = CAST(@type_id AS NVARCHAR(255))
+        WHERE id = @id;
 
         -- Transform các cột brief_vn
-        IF @brief != 'unknown'
+        SELECT @brief_id = brief_vn_id
+        FROM dim_brief_vn
+        WHERE brief_vn = @brief;
+
+        IF @brief_id IS NULL
         BEGIN
-            SELECT @brief_id = brief_vn_id
-            FROM dim_brief_vn
-            WHERE brief_vn = @brief;
-
-            IF @brief_id IS NULL
-            BEGIN
-                INSERT INTO dim_brief_vn (brief_vn)
-                VALUES (@brief);
-                SET @brief_id = SCOPE_IDENTITY();
-            END;
-
-            UPDATE phimChieuRap_Staging
-            SET brief_vn = @brief_id
-            WHERE id = @id;
+            INSERT INTO dim_brief_vn (brief_vn)
+            VALUES (@brief);
+            SET @brief_id = SCOPE_IDENTITY();
         END;
+
+        UPDATE phimChieuRap_Staging
+        SET brief_vn = CAST(@brief_id AS NVARCHAR(255))
+        WHERE id = @id;
 
         -- Transform các cột name_vn
-        IF @name != 'unknown'
+        SELECT @name_id = name_vn_id
+        FROM dim_name_vn
+        WHERE name_vn = @name;
+
+        IF @name_id IS NULL
         BEGIN
-            SELECT @name_id = name_vn_id
-            FROM dim_name_vn
-            WHERE name_vn = @name;
-
-            IF @name_id IS NULL
-            BEGIN
-                INSERT INTO dim_name_vn (name_vn)
-                VALUES (@name);
-                SET @name_id = SCOPE_IDENTITY();
-            END;
-
-            UPDATE phimChieuRap_Staging
-            SET name_vn = @name_id
-            WHERE id = @id;
+            INSERT INTO dim_name_vn (name_vn)
+            VALUES (@name);
+            SET @name_id = SCOPE_IDENTITY();
         END;
+
+        UPDATE phimChieuRap_Staging
+        SET name_vn = CAST(@name_id AS NVARCHAR(255))
+        WHERE id = @id;
 
         -- Transform các cột director
-        IF @director != 'unknown'
+        SELECT @director_id = director_id
+        FROM dim_director
+        WHERE director = @director;
+
+        IF @director_id IS NULL
         BEGIN
-            SELECT @director_id = director_id
-            FROM dim_director
-            WHERE director = @director;
-
-            IF @director_id IS NULL
-            BEGIN
-                INSERT INTO dim_director (director)
-                VALUES (@director);
-                SET @director_id = SCOPE_IDENTITY();
-            END;
-
-            UPDATE phimChieuRap_Staging
-            SET director = @director_id
-            WHERE id = @id;
+            INSERT INTO dim_director (director)
+            VALUES (@director);
+            SET @director_id = SCOPE_IDENTITY();
         END;
+
+        UPDATE phimChieuRap_Staging
+        SET director = CAST(@director_id AS NVARCHAR(255))
+        WHERE id = @id;
 
         -- Transform các cột actor
-        IF @actor != 'unknown'
+        SELECT @actor_id = actor_id
+        FROM dim_actor
+        WHERE actor = @actor;
+
+        IF @actor_id IS NULL
         BEGIN
-            SELECT @actor_id = actor_id
-            FROM dim_actor
-            WHERE actor = @actor;
-
-            IF @actor_id IS NULL
-            BEGIN
-                INSERT INTO dim_actor (actor)
-                VALUES (@actor);
-                SET @actor_id = SCOPE_IDENTITY();
-            END;
-
-            UPDATE phimChieuRap_Staging
-            SET actor = @actor_id
-            WHERE id = @id;
+            INSERT INTO dim_actor (actor)
+            VALUES (@actor);
+            SET @actor_id = SCOPE_IDENTITY();
         END;
+
+        UPDATE phimChieuRap_Staging
+        SET actor = CAST(@actor_id AS NVARCHAR(255))
+        WHERE id = @id;
 
         -- Giữ nguyên các cột không transform: image, release_date, end_date, duration
         UPDATE phimChieuRap_Staging
